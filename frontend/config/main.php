@@ -11,9 +11,18 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
+    'modules' => [
+        'products' => [
+            'class' => 'frontend\modules\products\Module'
+        ] ,
+        'blog' => [
+            'class' => 'frontend\modules\blog\Module'
+        ] ,
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
+            'baseUrl' => ''
         ],
         'user' => [
             'identityClass' => 'common\models\User',
@@ -36,14 +45,22 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'site/index',
+                'blog' => 'blog/blog',
+                'products'=> 'products/products',
+                'products/<slug>/<brand>'=> 'products/products',
+                'products/<slug>'=> 'products/products',
+                'brands/<slug>'=> 'products/products',
+                'product/<slug>'=> 'products/products/product',
+                '<controller:\w+>/<action:\w+>/' => '<controller>/<action>',
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];

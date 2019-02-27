@@ -11,10 +11,50 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [],
+    'modules' => [
+        'products' => [
+            'class' => 'backend\modules\products\Module',
+        ],
+        'categories' => [
+            'class' => 'backend\modules\categories\Module',
+        ],
+        'brands' => [
+            'class' => 'backend\modules\brands\Module',
+        ],
+        'slider' => [
+            'class' => 'backend\modules\slider\Module',
+        ],
+        'blog' => [
+            'class' => 'backend\modules\blog\Module',
+        ],
+        'info' => [
+            'class' => 'backend\modules\info\Module',
+        ],
+        'pages' => [
+            'class' => 'backend\modules\pages\Module',
+        ],
+        'rules' => [
+            'class' => 'backend\modules\rules\Module',
+        ],
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
+            'baseUrl' => '/admin',
+        ],
+        'assetManager' => [
+            'bundles' => [
+                'dmstr\web\AdminLteAsset' => [
+                    'skin' => 'skin-green-light',
+                ],
+            ],
+        ],
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                    '@app/views' => '@web/views/layouts'
+                ],
+            ],
         ],
         'user' => [
             'identityClass' => 'common\models\User',
@@ -37,14 +77,16 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'site/index',
+                '<controller:\w+>/<action:\w+>/' => '<controller>/<action>',
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];

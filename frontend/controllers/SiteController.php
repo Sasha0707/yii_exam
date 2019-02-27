@@ -1,8 +1,11 @@
 <?php
+
 namespace frontend\controllers;
 
+use common\models\Cart;
+use common\models\Wishlist;
 use Yii;
-use yii\base\InvalidParamException;
+use yii\base\InvalidArgumentException;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -12,7 +15,8 @@ use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
-
+use common\models\Categories;
+use common\models\Products;
 /**
  * Site controller
  */
@@ -72,13 +76,91 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
-    }
 
+        $ForStylish = Products::find()->where(['for_stylish'=>'1'])->orderBy(['id'=>SORT_DESC])->limit(3)->asArray()->all();
+        $New = Products::find()->where(['is_new'=>'0'])->orderBy(['id'=>SORT_DESC])->limit(6)->asArray()->all();
+        $IsFeature=Products::find()->where(['is_feature'=>'1'])->orderBy(['id'=>SORT_DESC])->limit(6)->asArray()->all();
+        $Cat = Categories::find()->orderBy(['id'=>SORT_DESC])->limit(6)->asArray()->all();;
+        return $this->render('index',[
+            'ForStylish' =>$ForStylish,
+            'New' => $New,
+            'IsFeature' => $IsFeature,
+            'Cat' => $Cat,
+
+        ]);
+    }
+    public function actionCategory()
+    {
+        $All =  Products::find()->asArray()->All();
+        $ForStylish = Products::find()->where(['for_stylish'=>'1'])->orderBy(['id'=>SORT_DESC])->limit(3)->asArray()->all();
+        $New = Products::find()->where(['is_new'=>'0'])->orderBy(['id'=>SORT_DESC])->limit(6)->asArray()->all();
+        $IsFeature=Products::find()->where(['is_feature'=>'1'])->orderBy(['id'=>SORT_DESC])->limit(6)->asArray()->all();
+        $Cat = Categories::find()->asArray()->all();;
+        return $this->render('category',[
+            'ForStylish' =>$ForStylish,
+            'New' => $New,
+            'IsFeature' => $IsFeature,
+            'Cat' => $Cat,
+            'All' => $All
+
+        ]);
+    }
     public function actionBlog()
     {
-
         return $this->render('blog');
+    }
+    public function actionCat()
+    {
+        return $this->render('category');
+    }
+
+    public function actionConfirmation()
+    {
+        return $this->render('confirmation');
+    }
+
+    public function actionElements()
+    {
+        return $this->render('elements');
+    }
+
+    public function actionSingle()
+    {
+        return $this->render('single');
+    }
+    public function actionWish()
+    {
+        $wishlist = Wishlist::find()->with('product')->where(['user_id' => Yii::$app->user->id])->asArray()->all();
+
+//        echo "<pre>";
+        print_r($wishlist);
+        die;
+        return $this->render('wishlist',['wishlist' => $wishlist]);
+    }
+
+    public function actionSingleProduct()
+
+    {
+        $New = Products::find()->asArray()->where(['is_new'=>'0'])->orderBy(['id'=>SORT_DESC])->limit(6)->asArray()->all();
+
+        $id = Yii::$app->request->get('id');
+        $product = Products::find()->where(['id' => $id])->asArray()->one();
+        return $this->render('single-product',[
+            'product' =>$product,
+            'New' => $New,
+        ]);
+    }
+
+
+
+    public function actionTracking()
+    {
+        return $this->render('tracking');
+    }
+
+    public function actionCheckout()
+    {
+        return $this->render('checkout');
     }
 
     /**
@@ -204,7 +286,7 @@ class SiteController extends Controller
     {
         try {
             $model = new ResetPasswordForm($token);
-        } catch (InvalidParamException $e) {
+        } catch (InvalidArgumentException $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
 
@@ -218,4 +300,28 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+    public function actionCart()
+    {
+        if(!Yii::$app->user->isGuest){
+            $product = Cart::find()->with(['product'])->where(['user_id' => Yii::$app->user->id])->asArray()->all();
+            $products = [];
+            if(!empty($product)){
+                foreach ($product as $item){
+                    $products[$item['product_id']]['id'] = $item['id'];
+                    $products[$item['product_id']]['product'] = $item['product'];
+                    if(empty($products[$item['product_id']]['qty'])){
+                        $products[$item['product_id']]['qty'] = 0;
+                    }
+                    $products[$item['product_id']]['qty'] += (int)$item['quantity'];
+                }
+            }
+
+            return $this->render('/site/cart',[
+                'products' =>$products
+            ]);
+        }
+        return $this->redirect(['/']);
+
+    }
 }
+
